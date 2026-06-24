@@ -700,8 +700,39 @@ void Button_On5xClick(int index)
 		addLogAdv(LOG_INFO, LOG_FEATURE_GENERAL, "Child lock!");
 		return;
 	}
-	// fire event - button on pin <index> was 4clicked
+	// fire event - button on pin <index> was 5clicked
 	EventHandlers_FireEvent(CMD_EVENT_PIN_ON5CLICK, index);
+}
+static byte Button_GetMultiClickEvent(int clickCount) {
+	switch (clickCount) {
+	case 6:
+		return CMD_EVENT_PIN_ON6CLICK;
+	case 7:
+		return CMD_EVENT_PIN_ON7CLICK;
+	case 8:
+		return CMD_EVENT_PIN_ON8CLICK;
+	case 9:
+		return CMD_EVENT_PIN_ON9CLICK;
+	case 10:
+		return CMD_EVENT_PIN_ON10CLICK;
+	default:
+		return CMD_EVENT_NONE;
+	}
+}
+void Button_OnMultiClick(int index, int clickCount)
+{
+	byte eventCode;
+
+	addLogAdv(LOG_INFO, LOG_FEATURE_GENERAL, "%i key_%ix_press", index, clickCount);
+	if (CFG_HasFlag(OBK_FLAG_BUTTON_DISABLE_ALL)) {
+		addLogAdv(LOG_INFO, LOG_FEATURE_GENERAL, "Child lock!");
+		return;
+	}
+	eventCode = Button_GetMultiClickEvent(clickCount);
+	if (eventCode == CMD_EVENT_NONE) {
+		return;
+	}
+	EventHandlers_FireEvent(eventCode, index);
 }
 void Button_OnLongPressHold(int index) {
 	addLogAdv(LOG_INFO, LOG_FEATURE_GENERAL, "%i Button_OnLongPressHold", index);
@@ -2128,6 +2159,10 @@ void PIN_Input_Handler(int pinIndex, uint32_t ms_since_last)
 			else if (handle->repeat == 5) {
 				handle->event = (uint8_t)BTN_5X_CLICK;
 				Button_On5xClick(pinIndex);
+			}
+			else if (handle->repeat <= 10) {
+				handle->event = (uint8_t)BTN_5X_CLICK;
+				Button_OnMultiClick(pinIndex, handle->repeat);
 			}
 			handle->state = 0;
 		}

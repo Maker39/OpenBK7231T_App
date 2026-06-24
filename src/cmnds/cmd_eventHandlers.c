@@ -157,6 +157,16 @@ int EVENT_ParseEventName(const char *s) {
 		return CMD_EVENT_PIN_ON4CLICK;
 	if (!stricmp(s, "On5Click"))
 		return CMD_EVENT_PIN_ON5CLICK;
+	if (!stricmp(s, "On6Click"))
+		return CMD_EVENT_PIN_ON6CLICK;
+	if (!stricmp(s, "On7Click"))
+		return CMD_EVENT_PIN_ON7CLICK;
+	if (!stricmp(s, "On8Click"))
+		return CMD_EVENT_PIN_ON8CLICK;
+	if (!stricmp(s, "On9Click"))
+		return CMD_EVENT_PIN_ON9CLICK;
+	if (!stricmp(s, "On10Click"))
+		return CMD_EVENT_PIN_ON10CLICK;
 	if(!stricmp(s,"OnChannelChange"))
 		return CMD_EVENT_CHANNEL_ONCHANGE;
 	if(!stricmp(s,"OnUART"))

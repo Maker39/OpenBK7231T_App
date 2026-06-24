@@ -3,6 +3,8 @@
 #include "selftest_local.h"
 
 void Test_ButtonEvents() {
+	int i;
+
 	// reset whole device
 	SIM_ClearOBK(0);
 
@@ -95,6 +97,35 @@ void Test_ButtonEvents() {
 	SELFTEST_ASSERT_CHANNEL(11, (123 + 123 + 123));
 	SELFTEST_ASSERT_CHANNEL(12, 22);
 	SELFTEST_ASSERT_CHANNEL(13, 1201);
+
+	//
+	// Test higher multi-click events
+	//
+	CMD_ExecuteCommand("clearAllHandlers", 0);
+	CMD_ExecuteCommand("setChannel 14 0", 0);
+	CMD_ExecuteCommand("setChannel 15 0", 0);
+	CMD_ExecuteCommand("addEventHandler On6Click 9 addChannel 14 6", 0);
+	CMD_ExecuteCommand("addEventHandler On10Click 9 addChannel 15 10", 0);
+	Sim_RunFrames(1000, false);
+	for (i = 0; i < 6; i++) {
+		SIM_SetSimulatedPinValue(9, false);
+		Sim_RunFrames(15, false);
+		SIM_SetSimulatedPinValue(9, true);
+		Sim_RunFrames(15, false);
+	}
+	Sim_RunFrames(100, false);
+	SELFTEST_ASSERT_CHANNEL(14, 6);
+	SELFTEST_ASSERT_CHANNEL(15, 0);
+	Sim_RunFrames(1000, false);
+	for (i = 0; i < 10; i++) {
+		SIM_SetSimulatedPinValue(9, false);
+		Sim_RunFrames(15, false);
+		SIM_SetSimulatedPinValue(9, true);
+		Sim_RunFrames(15, false);
+	}
+	Sim_RunFrames(100, false);
+	SELFTEST_ASSERT_CHANNEL(14, 6);
+	SELFTEST_ASSERT_CHANNEL(15, 10);
 
 	PIN_SetPinRoleForPinIndex(10, IOR_ToggleChannelOnToggle_pd);
 	PIN_SetPinChannelForPinIndex(10, 5);
