@@ -703,8 +703,18 @@ void Button_On5xClick(int index)
 	// fire event - button on pin <index> was 5clicked
 	EventHandlers_FireEvent(CMD_EVENT_PIN_ON5CLICK, index);
 }
-static byte Button_GetMultiClickEvent(int clickCount) {
+static byte Button_GetClickEvent(int clickCount) {
 	switch (clickCount) {
+	case 1:
+		return CMD_EVENT_PIN_ONCLICK;
+	case 2:
+		return CMD_EVENT_PIN_ONDBLCLICK;
+	case 3:
+		return CMD_EVENT_PIN_ON3CLICK;
+	case 4:
+		return CMD_EVENT_PIN_ON4CLICK;
+	case 5:
+		return CMD_EVENT_PIN_ON5CLICK;
 	case 6:
 		return CMD_EVENT_PIN_ON6CLICK;
 	case 7:
@@ -728,7 +738,7 @@ void Button_OnMultiClick(int index, int clickCount)
 		addLogAdv(LOG_INFO, LOG_FEATURE_GENERAL, "Child lock!");
 		return;
 	}
-	eventCode = Button_GetMultiClickEvent(clickCount);
+	eventCode = Button_GetClickEvent(clickCount);
 	if (eventCode == CMD_EVENT_NONE) {
 		return;
 	}
@@ -2139,30 +2149,34 @@ void PIN_Input_Handler(int pinIndex, uint32_t ms_since_last)
 			handle->state = 3;
 		}
 		else if (handle->ticks > BTN_SHORT_MS) { //released timeout
-			if (handle->repeat == 1) {
+			switch (handle->repeat) {
+			case 1:
 				handle->event = (uint8_t)BTN_SINGLE_CLICK;
 				EVENT_CB(BTN_SINGLE_CLICK);
 				Button_OnShortClick(pinIndex);
-			}
-			else if (handle->repeat == 2) {
+				break;
+			case 2:
 				handle->event = (uint8_t)BTN_DOUBLE_CLICK;
 				Button_OnDoubleClick(pinIndex);
-			}
-			else if (handle->repeat == 3) {
+				break;
+			case 3:
 				handle->event = (uint8_t)BTN_TRIPLE_CLICK;
 				Button_OnTripleClick(pinIndex);
-			}
-			else if (handle->repeat == 4) {
+				break;
+			case 4:
 				handle->event = (uint8_t)BTN_QUADRUPLE_CLICK;
 				Button_OnQuadrupleClick(pinIndex);
-			}
-			else if (handle->repeat == 5) {
+				break;
+			case 5:
 				handle->event = (uint8_t)BTN_5X_CLICK;
 				Button_On5xClick(pinIndex);
-			}
-			else if (handle->repeat <= 10) {
-				handle->event = (uint8_t)BTN_5X_CLICK;
-				Button_OnMultiClick(pinIndex, handle->repeat);
+				break;
+			default:
+				if (handle->repeat <= 10) {
+					handle->event = (uint8_t)BTN_5X_CLICK;
+					Button_OnMultiClick(pinIndex, handle->repeat);
+				}
+				break;
 			}
 			handle->state = 0;
 		}
